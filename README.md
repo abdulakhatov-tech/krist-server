@@ -2,7 +2,7 @@
 
 This project is the backend API for Krist E-Commerce Shop, built using **NestJS, TypeScript, and PostgreSQL**.
 
-![E-Commerce Backend Preview](public/e-commerce.png)
+![E-Commerce Backend Preview](public/krist.png)
 
 ## 🚀 Technologies Used
 - **NestJS**: Modular and scalable framework for building APIs.
