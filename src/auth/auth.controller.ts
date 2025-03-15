@@ -23,8 +23,8 @@ export class AuthController {
 		return this.authService.refreshToken(refreshTokenDto);
 	}
 
-	// @Post("sign-out")
-	// async logout(@Body("userId") userId: string) {
-	// 	return this.authService.logout(userId);
-	// }
+	@Post("sign-out")
+	async logout(@Body("userId") userId: string) {
+		return this.authService.logout(userId);
+	}
 }

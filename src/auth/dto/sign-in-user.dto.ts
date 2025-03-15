@@ -1,10 +1,4 @@
-import {
-	IsBoolean,
-	IsNotEmpty,
-	IsOptional,
-	IsString,
-	Length,
-} from "class-validator";
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class SignInUserDto {
 	@IsString()

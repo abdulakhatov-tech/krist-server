@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
@@ -21,8 +21,8 @@ import { UsersModule } from "./users/users.module";
 			entities: [User], // Ensure User entity is included
 			synchronize: true, // Auto sync DB (disable in production)
 		}),
-		AuthModule,
-		UsersModule,
+		forwardRef(() => AuthModule),
+		forwardRef(() => UsersModule),
 	],
 	controllers: [AppController],
 	providers: [AppService],
