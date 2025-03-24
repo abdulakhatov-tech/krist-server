@@ -17,6 +17,8 @@
 		"noImplicitAny": false,
 		"strictBindCallApply": false,
 		"noFallthroughCasesInSwitch": false,
-    	"importsNotUsedAsValues": "remove"
+		"importsNotUsedAsValues": "remove", // Default (remove unused imports)
+		"preserveValueImports": false,      // Disable if true
+		"isolatedModules": false            // Disable if true (can conflict with "import type")
 	}
 }
