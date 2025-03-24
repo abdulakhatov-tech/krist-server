@@ -1,13 +1,13 @@
 set -e # Skriptni xatolik yuz bersa to'xtatish
 
 echo "🔍 Running Biome format (auto-fixing code)..."
-npx @biomejs/biome format --write .
+npx @biomejs/biome format --write src/
 
 echo "✅ Running Biome check (fixing issues)..."
-npx @biomejs/biome check --write .
+npx @biomejs/biome check --write src/
 
 echo "🔬 Running Biome lint (auto-linting code)..."
-npx @biomejs/biome lint --write .
+npx @biomejs/biome lint --write src/
 
 # Git diff bilan tekshirish (faqat agar kerak bo'lsa)
 if ! git diff --quiet; then
