@@ -19,6 +19,6 @@
 		"noFallthroughCasesInSwitch": false,
 		"importsNotUsedAsValues": "remove", // Default (remove unused imports)
 		"preserveValueImports": false,      // Disable if true
-		"isolatedModules": false            // Disable if true (can conflict with "import type")
+		"isolatedModules": false            // Disable if true (can conflict with "import")
 	}
 }

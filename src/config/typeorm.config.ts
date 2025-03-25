@@ -1,4 +1,4 @@
-import type { TypeOrmModuleOptions } from "@nestjs/typeorm";
+import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import * as entities from "../entities"; // Import all entities
 
 export const typeOrmConfig: TypeOrmModuleOptions = {

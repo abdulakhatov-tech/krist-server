@@ -4,18 +4,18 @@ import {
 	NotFoundException,
 	UnauthorizedException,
 } from "@nestjs/common";
-import type { JwtService } from "@nestjs/jwt";
+import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 
-import type { User } from "src/entities";
-import type { UserService } from "../user/user.service";
-import type {
+import { User } from "src/entities";
+import { UserService } from "../user/user.service";
+import {
 	AuthResponseType,
 	GenerateTokensResponseType,
 	RefreshTokenResponseType,
 	SignOutResponseType,
 } from "./auth.interface";
-import type {
+import {
 	RefreshTokenDto,
 	SignInUserDto,
 	SignOutUserDto,

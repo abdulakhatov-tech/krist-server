@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from "@nestjs/common";
 
-import type { AuthService } from "./auth.service";
-import type {
+import { AuthService } from "./auth.service";
+import {
 	RefreshTokenDto,
 	SignInUserDto,
 	SignOutUserDto,

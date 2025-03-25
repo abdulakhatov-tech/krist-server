@@ -5,10 +5,10 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcrypt";
-import type { Repository } from "typeorm";
+import { Repository } from "typeorm";
 
 import { User } from "src/entities";
-import type { SignUpUserDto } from "../auth/dto";
+import { SignUpUserDto } from "../auth/dto";
 
 @Injectable()
 export class UserService {
