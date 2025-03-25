@@ -9,6 +9,7 @@ import {
 	SignUpUserDto,
 	VerifyOtpDto,
 } from "./dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -42,5 +43,10 @@ export class AuthController {
 	@Post('verify-otp')
 	async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
 		return this.authService.verifyOtp(verifyOtpDto);
+	}
+
+	@Post('reset-password') 
+	async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+		return this.authService.resetPassword(resetPasswordDto);
 	}
 }

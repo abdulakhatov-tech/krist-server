@@ -43,3 +43,8 @@ export interface VerifyOtpResponseType {
   success: boolean;
   message: string;
 }
+
+export interface ResetPasswordResponseType {
+  success: boolean;
+  message: string;
+}

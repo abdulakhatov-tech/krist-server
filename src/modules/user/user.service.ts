@@ -1,73 +1,86 @@
 import {
-	ConflictException,
-	Injectable,
-	InternalServerErrorException,
-} from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import * as bcrypt from "bcrypt";
-import { Repository } from "typeorm";
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
+import { Repository } from 'typeorm';
 
-import { User } from "src/entities";
-import { SignUpUserDto } from "../auth/dto";
+import { User } from 'src/entities';
+import { SignUpUserDto } from '../auth/dto';
 
 @Injectable()
 export class UserService {
-	constructor(
-		@InjectRepository(User) private readonly userRepository: Repository<User>,
-	) {}
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+  ) {}
 
-	async findOneById(id: string): Promise<User | null> {
-		return this.userRepository.findOneBy({ id });
-	}
+  async findOneById(id: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ id });
+  }
 
-	async findOneByIdentifier(identifier: string): Promise<User | null> {
-		return this.userRepository.findOne({
-			where: [{ email: identifier }, { phoneNumber: identifier }],
-		});
-	}
+  async findOneByIdentifier(identifier: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: [{ email: identifier }, { phoneNumber: identifier }],
+    });
+  }
 
-	async createUser(body: SignUpUserDto): Promise<User> {
-		const { identifier, password } = body;
+  async createUser(body: SignUpUserDto): Promise<User> {
+    const { identifier, password } = body;
 
-		const existingUser = await this.findOneByIdentifier(identifier);
+    const existingUser = await this.findOneByIdentifier(identifier);
 
-		if (existingUser) {
-			throw new ConflictException("User already exists!");
-		}
+    if (existingUser) {
+      throw new ConflictException('User already exists!');
+    }
 
-		const hashedPassword = await bcrypt.hash(password, 10);
-		const newUser = this.userRepository.create({
-			...body,
-			email: identifier.includes("@") ? identifier : null,
-			phoneNumber: identifier.includes("@") ? null : identifier,
-			password: hashedPassword,
-		});
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = this.userRepository.create({
+      ...body,
+      email: identifier.includes('@') ? identifier : null,
+      phoneNumber: identifier.includes('@') ? null : identifier,
+      password: hashedPassword,
+    });
 
-		try {
-			return await this.userRepository.save(newUser);
-		} catch (error) {
-			throw new InternalServerErrorException("Error creating user!");
-		}
-	}
+    try {
+      return await this.userRepository.save(newUser);
+    } catch (error) {
+      throw new InternalServerErrorException('Error creating user!');
+    }
+  }
 
-	async updateRefreshToken(
-		userId: string,
-		refreshToken: string,
-	): Promise<void> {
-		const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-		await this.userRepository.update(userId, {
-			refreshToken: hashedRefreshToken,
-		});
-	}
+  async updateRefreshToken(
+    userId: string,
+    refreshToken: string,
+  ): Promise<void> {
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.userRepository.update(userId, {
+      refreshToken: hashedRefreshToken,
+    });
+  }
 
-	async clearRefreshToken(userId: string): Promise<void> {
-		await this.userRepository.update(userId, { refreshToken: null });
-	}
+  async clearRefreshToken(userId: string): Promise<void> {
+    await this.userRepository.update(userId, { refreshToken: null });
+  }
 
-	async saveOtp(userId: string, otpCode: string | null, expiresAt: number | null): Promise<void> {
-		await this.userRepository.update(userId, {
-			otpCode,
-			otpExpiresAt: expiresAt ?  new Date(expiresAt) : null
-		})
-	}
+  async saveOtp(
+    userId: string,
+    otpCode: string | null,
+    expiresAt: number | null,
+  ): Promise<void> {
+    await this.userRepository.update(userId, {
+      otpCode,
+      otpExpiresAt: expiresAt ? new Date(expiresAt) : null,
+    });
+  }
+
+  async updateUser(
+    userId: string,
+    updateDate: Partial<User>,
+  ): Promise<User | null> {
+    await this.userRepository.update(userId, updateDate);
+
+    return this.findOneById(userId);
+  }
 }

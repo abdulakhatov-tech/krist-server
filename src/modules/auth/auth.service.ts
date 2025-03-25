@@ -14,6 +14,7 @@ import {
   ForgotPasswordResponseType,
   GenerateTokensResponseType,
   RefreshTokenResponseType,
+  ResetPasswordResponseType,
   SignOutResponseType,
   VerifyOtpResponseType,
 } from './auth.interface';
@@ -25,6 +26,7 @@ import {
   SignUpUserDto,
   VerifyOtpDto,
 } from './dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -224,6 +226,34 @@ export class AuthService {
     return {
       success: true, 
       message: "OTP verified successfully! You can reset your password."
+    }
+  }
+
+  async resetPassword(body: ResetPasswordDto): Promise<ResetPasswordResponseType> {
+    const { identifier, newPassword } = body;
+
+    if(!identifier || !newPassword) {
+      throw new BadRequestException('Identifier and new password are required.')
+    }
+
+    const user = await this.userService.findOneByIdentifier(identifier);
+
+    if(!user) {
+      throw new NotFoundException('User not found!');
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password
+    await this.userService.updateUser(user.id, { password: hashedPassword });
+
+    // Clear any stored OTP
+    await this.userService.saveOtp(user.id, null, null);
+
+    return {
+      success:true,
+      message: "Password has been reset successfully!"
     }
   }
 }
