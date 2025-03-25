@@ -63,4 +63,11 @@ export class UserService {
 	async clearRefreshToken(userId: string): Promise<void> {
 		await this.userRepository.update(userId, { refreshToken: null });
 	}
+
+	async saveOtp(userId: string, otpCode: string | null, expiresAt: number | null): Promise<void> {
+		await this.userRepository.update(userId, {
+			otpCode,
+			otpExpiresAt: expiresAt ?  new Date(expiresAt) : null
+		})
+	}
 }

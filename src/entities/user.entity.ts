@@ -48,6 +48,12 @@ export class User {
 	@Column({ type: "varchar", nullable: true })
 	refreshToken: string | null;
 
+	@Column({ type: 'varchar', nullable: true })
+	otpCode?: string | null;
+  
+	@Column({ type: "timestamp", nullable: true })
+	otpExpiresAt?: Date | null;
+
 	@CreateDateColumn({ type: "timestamp" })
 	createdAt: Date;
 
