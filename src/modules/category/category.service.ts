@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from 'src/entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import {
-  CreateCategoryResponseType,
+  CategoryResponseType,
   DeleteCategoryResponseType,
   FindAllCategoryResponseType,
 } from './category.interface';
@@ -48,9 +48,21 @@ export class CategoryService {
     }
   }
 
-  async createCategory(
-    dto: CreateCategoryDto,
-  ): Promise<CreateCategoryResponseType> {
+  async findBySlug(slug: string): Promise<CategoryResponseType> {
+    const category = await this.categoryRepository.findOne({ where: { slug } });
+
+    if (!category) {
+      throw new NotFoundException(`Category with Slug "${slug}" not found`);
+    }
+
+    return {
+      success: true,
+      message: 'ok',
+      data: category,
+    };
+  }
+
+  async createCategory(dto: CreateCategoryDto): Promise<CategoryResponseType> {
     const { slug } = dto;
 
     const existingCategory = await this.categoryRepository.findOne({
@@ -76,7 +88,7 @@ export class CategoryService {
   async updateCategory(
     slug: string,
     dto: UpdateCategoryDto,
-  ): Promise<CreateCategoryResponseType> {
+  ): Promise<CategoryResponseType> {
     const category = await this.categoryRepository.findOne({ where: { slug } });
 
     if (!category) {

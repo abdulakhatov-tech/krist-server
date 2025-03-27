@@ -6,7 +6,7 @@ export interface FindAllCategoryResponseType {
     data: Category[]
 }
 
-export interface CreateCategoryResponseType {
+export interface CategoryResponseType {
     success: boolean;
     message: string;
     data: Category

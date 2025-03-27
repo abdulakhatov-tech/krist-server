@@ -12,6 +12,11 @@ export class CategoryController {
     return this.categoryService.findAll();
   }
 
+  @Get(':slug') 
+  async findBySlug(@Param('slug') slug: string) {
+    return this.categoryService.findBySlug(slug);
+  }
+
   @Post('create')
   async createCategory(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoryService.createCategory(createCategoryDto);
