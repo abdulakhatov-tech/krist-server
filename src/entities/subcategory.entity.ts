@@ -2,12 +2,14 @@ import {
   Column,
   Entity,
   ManyToOne,
+  OneToMany,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Category } from './category.entity';
+import { Product } from './product.entity';
 
 @Entity('subcategories')
 export class Subcategory {
@@ -17,19 +19,24 @@ export class Subcategory {
   @Column({ type: 'varchar', length: 100 })
   name: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, unique: true })
   slug: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   image_url: string;
 
-  @ManyToOne(() => Category, (category) => category.subcategories)
+  @ManyToOne(() => Category, (category) => category.subcategories, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'category_id' })
   category: Category;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @OneToMany(() => Product, (product) => product.subcategory)
+  products: Product[];
+
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
   updatedAt: Date;
 }

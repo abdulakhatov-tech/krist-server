@@ -16,7 +16,7 @@ async function ensureFolderExists(folderName: string) {
 export const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
-    const folderName = 'uploads'; // Change to your preferred folder name
+    const folderName = 'kirst'; // Change to your preferred folder name
     await ensureFolderExists(folderName); // Ensure folder exists before uploading
 
     const allowedFormats = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'pdf', 'mp4', 'mov', 'avi'];
