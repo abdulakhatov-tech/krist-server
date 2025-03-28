@@ -9,6 +9,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { UserModule } from "./modules/user/user.module";
 import { CategoryModule } from './modules/category/category.module';
 import { SubcategoryModule } from './modules/subcategory/subcategory.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
 	imports: [
@@ -18,6 +19,7 @@ import { SubcategoryModule } from './modules/subcategory/subcategory.module';
 		UserModule,
 		CategoryModule,
 		SubcategoryModule,
+		UploadModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
