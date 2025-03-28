@@ -27,6 +27,11 @@ export class CategoryController {
     return this.categoryService.findBySlug(slug);
   }
 
+  @Get(':slug/subcategories') 
+  async findSubCategoriesByCategorySlug(@Param('slug') slug: string ) {
+    return this.categoryService.findSubCategoriesByCategorySlug(slug);
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createCategoryDto: CreateCategoryDto) {

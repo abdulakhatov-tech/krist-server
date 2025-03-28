@@ -10,6 +10,7 @@ import { UpdateCategoryDto } from './dto';
 import { Category } from 'src/entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { ResponseType } from 'src/common/interfaces/general';
+import { Subcategory } from 'src/entities';
 
 @Injectable()
 export class CategoryService {
@@ -19,7 +20,9 @@ export class CategoryService {
   ) {}
 
   async findAll(): Promise<ResponseType<Category[]>> {
-    const categories = await this.categoryRepository.find();
+    const categories = await this.categoryRepository.find({
+      relations: ['subcategories'],
+    });
 
     return {
       success: true,
@@ -35,6 +38,25 @@ export class CategoryService {
       success: true,
       message: 'Category found successfully.',
       data: category,
+    };
+  }
+
+  async findSubCategoriesByCategorySlug(
+    slug: string,
+  ): Promise<ResponseType<Subcategory[]>> {
+    const category = await this.categoryRepository.findOne({
+      where: { slug },
+      relations: ['subcategories'],
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with slug "${slug}" not found.`);
+    }
+
+    return {
+      success: true,
+      message: 'Subcategories fetched successfully.',
+      data: category.subcategories,
     };
   }
 

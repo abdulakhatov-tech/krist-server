@@ -36,15 +36,17 @@ export class SubcategoryService {
       data: subcategory,
     };
   }
-
-  async createSubCategory(dto: CreateSubCategoryDto): Promise<ResponseType<Subcategory>> {
+  
+  async createSubCategory(
+    dto: CreateSubCategoryDto,
+  ): Promise<ResponseType<Subcategory>> {
     await this.ensureSlugDoesNotExist(dto.slug);
 
     const subcategory = this.subcategoryRepository.create({
       ...dto,
-      category: { id: dto.category }
+      category: { id: dto.category },
     });
-    
+
     await this.subcategoryRepository.save(subcategory);
 
     return {
