@@ -22,9 +22,9 @@ export class SubcategoryController {
     return this.subcategoryService.findAll();
   }
 
-  @Get(':slug')
-  async findBySlug(@Param('slug') slug: string) {
-    return this.subcategoryService.findBySlug(slug);
+  @Get(':id')
+  async findById(@Param('id') id: string) {
+    return this.subcategoryService.findById(id);
   }
 
   @Post()
@@ -33,16 +33,16 @@ export class SubcategoryController {
     return this.subcategoryService.createSubCategory(createSubCategoryDto);
   }
 
-  @Patch(':slug')
+  @Patch(':id')
   async update(
-    @Param('slug') slug: string,
+    @Param('id') id: string,
     @Body() editSubCategoryDto: EditSubCategoryDto,
   ) {
-    return this.subcategoryService.editSubCategory(slug, editSubCategoryDto);
+    return this.subcategoryService.editSubCategory(id, editSubCategoryDto);
   }
 
-  @Delete(':slug')
-  async remove(@Param('slug') slug: string) {
-    return this.subcategoryService.deleteSubCategory(slug);
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return this.subcategoryService.deleteSubCategory(id);
   }
 }

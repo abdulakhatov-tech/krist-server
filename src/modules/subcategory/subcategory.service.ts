@@ -27,8 +27,8 @@ export class SubcategoryService {
     };
   }
 
-  async findBySlug(slug: string): Promise<ResponseType<Subcategory>> {
-    const subcategory = await this.findSubcategoryOrFail(slug);
+  async findById(id: string): Promise<ResponseType<Subcategory>> {
+    const subcategory = await this.findSubcategoryOrFail(id);
 
     return {
       success: true,
@@ -57,10 +57,10 @@ export class SubcategoryService {
   }
 
   async editSubCategory(
-    slug: string,
+    id: string,
     dto: EditSubCategoryDto,
   ): Promise<ResponseType<Subcategory>> {
-    const subcategory = await this.findSubcategoryOrFail(slug);
+    const subcategory = await this.findSubcategoryOrFail(id);
 
     Object.assign(subcategory, dto);
     const updatedSubcategory =
@@ -73,8 +73,8 @@ export class SubcategoryService {
     };
   }
 
-  async deleteSubCategory(slug: string): Promise<ResponseType> {
-    const subcategory = await this.findSubcategoryOrFail(slug);
+  async deleteSubCategory(id: string): Promise<ResponseType> {
+    const subcategory = await this.findSubcategoryOrFail(id);
     await this.subcategoryRepository.delete(subcategory.id);
 
     return {
@@ -84,13 +84,13 @@ export class SubcategoryService {
   }
 
   // Helper method to find a subcategory by slug or throw NotFoundException
-  private async findSubcategoryOrFail(slug: string): Promise<Subcategory> {
+  private async findSubcategoryOrFail(id: string): Promise<Subcategory> {
     const subcategory = await this.subcategoryRepository.findOne({
-      where: { slug },
+      where: { id },
     });
 
     if (!subcategory) {
-      throw new NotFoundException(`Subcategory with slug "${slug}" not found.`);
+      throw new NotFoundException(`Subcategory with id "${id}" not found.`);
     }
 
     return subcategory;
