@@ -1,13 +1,13 @@
 import {
-  Body,
-  Controller,
-  Delete,
   Get,
-  HttpCode,
-  HttpStatus,
+  Body,
+  Post,
   Param,
   Patch,
-  Post,
+  Delete,
+  HttpCode,
+  Controller,
+  HttpStatus,
 } from '@nestjs/common';
 
 import { CategoryService } from './category.service';
@@ -22,9 +22,9 @@ export class CategoryController {
     return this.categoryService.findAll();
   }
 
-  @Get(':slug')
-  async findBySlug(@Param('slug') slug: string) {
-    return this.categoryService.findBySlug(slug);
+  @Get(':id')
+  async findById(@Param('id') id: string) {
+    return this.categoryService.findById(id);
   }
 
   @Get(':slug/subcategories') 
@@ -38,16 +38,16 @@ export class CategoryController {
     return this.categoryService.createCategory(createCategoryDto);
   }
 
-  @Patch(':slug')
+  @Patch(':id')
   async update(
-    @Param('slug') slug: string,
+    @Param('id') id: string,
     @Body() updadateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.categoryService.updateCategory(slug, updadateCategoryDto);
+    return this.categoryService.updateCategory(id, updadateCategoryDto);
   }
 
-  @Delete(':slug')
-  async remove(@Param('slug') slug: string) {
-    return this.categoryService.deleteCategory(slug);
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return this.categoryService.deleteCategory(id);
   }
 }

@@ -1,5 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+
 import { ProductService } from './product.service';
+import { CreateProductDto } from './dto';
 
 @Controller('products')
 export class ProductController {
@@ -22,5 +24,10 @@ export class ProductController {
             }
 
         return this.productService.findAll(queries);
+    }
+
+    @Post()
+    async create(@Body() createProductDto: CreateProductDto) {
+        return this.productService.createProduct(createProductDto);
     }
 }

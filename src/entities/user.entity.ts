@@ -48,13 +48,13 @@ export class User {
   @Column({ type: 'varchar', nullable: true, length: 200 })
   extraAddress?: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', nullable: true, select: false })
   refreshToken?: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', nullable: true, select: false })
   otpCode?: string | null;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamp', nullable: true, select: false })
   otpExpiresAt?: Date | null;
 
   @OneToMany(() => Product, (product) => product.createdBy)

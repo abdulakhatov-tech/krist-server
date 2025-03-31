@@ -18,16 +18,22 @@ import { Color } from './color.entity';
 import { Size } from './size.entity';
 import { Stock } from './stock.entity';
 
-@Entity()
+@Entity('products')
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 50 })
   name: string;
 
+  @Column({ type: 'varchar', length: 200 })
+  short_description: string;
+
   @Column({ type: 'varchar', length: 10000, nullable: true })
-  description?: string;
+  description?: string | null;
+
+  @Column({ type: 'varchar', length: 60, unique: true })
+  slug: string;
 
   @Column('decimal', { precision: 10, scale: 2, name: 'current_price' })
   currentPrice: number;
@@ -38,16 +44,19 @@ export class Product {
     name: 'original_price',
     nullable: true,
   })
-  originalPrice?: number;
+  originalPrice?: number | null;
 
-  @Column('decimal', { precision: 2, scale: 1, nullable: true })
-  rating?: number;
+  @Column('decimal', { precision: 2, scale: 1, default: 0 })
+  rating: number;
 
   @Column({ name: 'review_count', type: 'int', default: 0 })
   reviewCount: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: true, name: 'image_url' })
-  imageUrl?: string;
+  @Column({ type: 'varchar', length: 255, name: 'image_url' })
+  imageUrl: string;
+
+  @Column('text', { array: true, name: 'image_urls' })
+  imageUrls: string[]
 
   @ManyToOne(() => Category, (category) => category.products, {
     nullable: true,

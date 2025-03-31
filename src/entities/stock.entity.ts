@@ -3,7 +3,7 @@ import { Product } from './product.entity';
 import { Color } from './color.entity';
 import { Size } from './size.entity';
 
-@Entity()
+@Entity('stocks')
 export class Stock {
   @PrimaryGeneratedColumn('uuid')
   id: string;

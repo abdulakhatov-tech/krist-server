@@ -7,10 +7,10 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { UpdateCategoryDto } from './dto';
-import { Category } from 'src/entities/category.entity';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { ResponseType } from 'src/common/interfaces/general';
 import { Subcategory } from 'src/entities';
+import { Category } from 'src/entities/category.entity';
+import { ResponseType } from 'src/common/interfaces/general';
+import { CreateCategoryDto } from './dto/create-category.dto';
 
 @Injectable()
 export class CategoryService {
@@ -31,8 +31,8 @@ export class CategoryService {
     };
   }
 
-  async findBySlug(slug: string): Promise<ResponseType<Category>> {
-    const category = await this.findCategoryOrFail(slug);
+  async findById(id: string): Promise<ResponseType<Category>> {
+    const category = await this.findCategoryOrFail(id);
 
     return {
       success: true,
@@ -50,7 +50,7 @@ export class CategoryService {
     });
 
     if (!category) {
-      throw new NotFoundException(`Category with slug "${slug}" not found.`);
+      throw new NotFoundException(`Category not found.`);
     }
 
     return {
@@ -76,10 +76,10 @@ export class CategoryService {
   }
 
   async updateCategory(
-    slug: string,
+    id: string,
     dto: UpdateCategoryDto,
   ): Promise<ResponseType<Category>> {
-    const category = await this.findCategoryOrFail(slug);
+    const category = await this.findCategoryOrFail(id);
 
     Object.assign(category, dto);
     const updatedCategory = await this.categoryRepository.save(category);
@@ -91,8 +91,8 @@ export class CategoryService {
     };
   }
 
-  async deleteCategory(slug: string): Promise<ResponseType> {
-    const category = await this.findCategoryOrFail(slug);
+  async deleteCategory(id: string): Promise<ResponseType> {
+    const category = await this.findCategoryOrFail(id);
     await this.categoryRepository.delete(category.id);
 
     return {
@@ -102,11 +102,11 @@ export class CategoryService {
   }
 
   // Helper method to find a category by slug or throw NotFoundException
-  private async findCategoryOrFail(slug: string): Promise<Category> {
-    const category = await this.categoryRepository.findOne({ where: { slug } });
+  private async findCategoryOrFail(id: string): Promise<Category> {
+    const category = await this.categoryRepository.findOne({ where: { id } });
 
     if (!category) {
-      throw new NotFoundException(`Category with slug "${slug}" not found.`);
+      throw new NotFoundException(`Category not found.`);
     }
 
     return category;
