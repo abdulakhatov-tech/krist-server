@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { UserRole } from 'src/common/enums/user-role.enum';
@@ -19,7 +19,7 @@ export class UserController {
     }
 
 
-    @Post('/role/:id')
+    @Put('/role/:id')
     async editUserRole(@Param('id') id: string, @Body() dto: UserRoleDto) {
         return this.userService.editUserRole(id, dto);
     }
