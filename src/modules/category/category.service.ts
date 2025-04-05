@@ -41,11 +41,11 @@ export class CategoryService {
     };
   }
 
-  async findSubCategoriesByCategoryId(
-    id: string,
+  async findSubCategoriesByCategorySlug(
+    slug: string,
   ): Promise<ResponseType<Subcategory[]>> {
     const category = await this.categoryRepository.findOne({
-      where: { id },
+      where: { slug },
       relations: ['subcategories'],
     });
 

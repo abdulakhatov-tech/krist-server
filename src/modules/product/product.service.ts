@@ -44,14 +44,24 @@ export class ProductService {
     limit = 24,
     minPrice,
     maxPrice,
+    category,
+    subcategory,
+    search,
+    startDate,
+    endDate,
   }: FindAllPropsType): Promise<ResponseType<Product[]>> {
     try {
       await this.validatePagination(page, limit);
 
-      const skip = (page - 1) * limit;
-      const where = this.buildPriceFilder(minPrice, maxPrice);
+      // Validate date range if provided
+      if (startDate && endDate && startDate > endDate) {
+        throw new BadRequestException('Start date cannot be after end date');
+      }
 
-      const [products, total] = await this.productRepository
+      const skip = (page - 1) * limit;
+
+      // Start building query
+      const queryBuilder = this.productRepository
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.createdBy', 'user')
         .leftJoinAndSelect('product.category', 'category')
@@ -66,8 +76,6 @@ export class ProductService {
           'product.imageUrls',
           'product.short_description',
           'product.description',
-          'product.currentPrice',
-          'product.originalPrice',
           'product.createdAt',
           'user.id',
           'user.firstName',
@@ -80,11 +88,41 @@ export class ProductService {
           'subcategory.name',
           'subcategory.slug',
         ])
-        .where(where)
-        .orderBy('product.id', 'ASC')
-        .skip(skip)
-        .take(limit)
-        .getManyAndCount();
+        .where(this.buildPriceFilter(minPrice, maxPrice));
+
+      // Apply category filter
+      if (category) {
+        queryBuilder.andWhere('category.slug = :categorySlug', {
+          categorySlug: category,
+        });
+      }
+
+      if(subcategory) {
+        queryBuilder.andWhere('subcategory.slug = :subcategorySlug', {
+          subcategorySlug: subcategory
+        })
+      }
+
+      // Apply search filter
+      if (search) {
+        queryBuilder.andWhere('product.name ILIKE :search', {
+          search: `%${search}%`,
+        });
+      }
+
+      // Apply date range filters
+      if (startDate) {
+        queryBuilder.andWhere('product.createdAt >= :startDate', { startDate });
+      }
+
+      if (endDate) {
+        queryBuilder.andWhere('product.createdAt <= :endDate', { endDate });
+      }
+
+      // Pagination and sorting
+      queryBuilder.orderBy('product.id', 'ASC').skip(skip).take(limit);
+
+      const [products, total] = await queryBuilder.getManyAndCount();
 
       const totalPages = Math.ceil(total / limit);
 
@@ -93,8 +131,8 @@ export class ProductService {
         message: 'Products fetched successfully',
         data: products,
         pagination: {
-          total, // Total records
-          totalPages, // Total pages
+          total,
+          totalPages,
           currentPage: page,
           perPage: limit,
           hasNext: page < totalPages,
@@ -110,7 +148,10 @@ export class ProductService {
 
   async findById(id: string): Promise<ResponseType<Product>> {
     try {
-      const product = await this.productRepository.findOne({ where: { id }, relations: ['category', 'subcategory', 'createdBy'] });
+      const product = await this.productRepository.findOne({
+        where: { id },
+        relations: ['category', 'subcategory', 'createdBy'],
+      });
 
       if (!product) {
         throw new NotFoundException('Product not found.');
@@ -152,41 +193,54 @@ export class ProductService {
 
   async editProduct(
     id: string,
-    dto: Partial<CreateProductDto>
+    dto: Partial<CreateProductDto>,
   ): Promise<ResponseType<Product>> {
     try {
       // Find the existing product
       const product = await this.productRepository.findOne({
         where: { id },
-        relations: ['category', 'subcategory', 'createdBy', 'colors', 'sizes', 'stock'],
+        relations: [
+          'category',
+          'subcategory',
+          'createdBy',
+          'colors',
+          'sizes',
+          'stock',
+        ],
       });
-  
+
       if (!product) {
         throw new NotFoundException(`Product with ID "${id}" not found.`);
       }
-  
+
       // If the slug is being updated, check for uniqueness
       if (dto.slug && dto.slug !== product.slug) {
         await this.checkForExistingProduct(dto.slug);
       }
-  
+
       // Fetch related entities if provided in DTO
       const relatedEntities = await this.findReletedEntities(dto);
-  
+
       // Apply updates only for fields provided in DTO
       Object.assign(product, {
         ...dto,
         category: relatedEntities.category || product.category,
         subcategory: relatedEntities.subcategory || product.subcategory,
         createdBy: relatedEntities.createdBy || product.createdBy,
-        colors: relatedEntities.colors.length ? relatedEntities.colors : product.colors,
-        sizes: relatedEntities.sizes.length ? relatedEntities.sizes : product.sizes,
-        stock: relatedEntities.stock.length ? relatedEntities.stock : product.stock,
+        colors: relatedEntities.colors.length
+          ? relatedEntities.colors
+          : product.colors,
+        sizes: relatedEntities.sizes.length
+          ? relatedEntities.sizes
+          : product.sizes,
+        stock: relatedEntities.stock.length
+          ? relatedEntities.stock
+          : product.stock,
       });
-  
+
       // Save the updated product
       await this.productRepository.save(product);
-  
+
       return {
         success: true,
         message: 'Product updated successfully.',
@@ -199,6 +253,23 @@ export class ProductService {
     }
   }
 
+  async deleteProduct(id: string): Promise<ResponseType> {
+    const product = await this.productRepository.findOne({where: {id}});
+
+    if(!product) {
+      throw new NotFoundException('Product not found!');
+    }
+
+    await this.productRepository.delete(id);
+
+    return {
+      success: true,
+      message: 'Product deleted successfully.',
+    }
+
+    
+  }
+
   // Methods to improve code quality and maintainability
   private async validatePagination(page: number, limit: number) {
     if (page < 1) throw new BadRequestException('Page must be greater than 0.');
@@ -206,7 +277,7 @@ export class ProductService {
       throw new BadRequestException('Limit must be greater than 0.');
   }
 
-  private buildPriceFilder(minPrice?: number, maxPrice?: number) {
+  private buildPriceFilter(minPrice?: number, maxPrice?: number) {
     const where: any = {};
 
     const isValidMinPrice = typeof minPrice === 'number' && !isNaN(minPrice);
@@ -237,9 +308,15 @@ export class ProductService {
           where: { id: dto.createdBy },
           select: ['id', 'firstName', 'lastName'],
         }),
-        dto.colors?.length ? this.colorRepository.findBy({ id: In(dto.colors) }) : [],
-        dto.sizes?.length ? this.sizeRepository.findBy({ id: In(dto.sizes) }) : [],
-        dto.stock?.length ? this.stockRepository.findBy({ id: In(dto.stock) }) : [],
+        dto.colors?.length
+          ? this.colorRepository.findBy({ id: In(dto.colors) })
+          : [],
+        dto.sizes?.length
+          ? this.sizeRepository.findBy({ id: In(dto.sizes) })
+          : [],
+        dto.stock?.length
+          ? this.stockRepository.findBy({ id: In(dto.stock) })
+          : [],
       ]);
 
     return { category, subcategory, createdBy, colors, sizes, stock };
