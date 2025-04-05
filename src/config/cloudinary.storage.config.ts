@@ -29,6 +29,12 @@ export const storage = new CloudinaryStorage({
       resourceType = 'video';
     }
 
+    // 🔹 Enforce file size limits
+    const fileSizeLimitMB = 5; // Set the max file size (e.g., 5MB)
+    if (file.size > fileSizeLimitMB * 1024 * 1024) {
+      throw new Error(`File size exceeds ${fileSizeLimitMB}MB limit.`);
+    }
+
     return {
       folder: folderName,
       format: allowedFormats.includes(fileExtension) ? fileExtension : undefined,

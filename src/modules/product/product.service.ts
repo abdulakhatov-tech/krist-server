@@ -51,23 +51,15 @@ export class ProductService {
       const skip = (page - 1) * limit;
       const where = this.buildPriceFilder(minPrice, maxPrice);
 
-      // Fixing: Use SQL comparison operators directly for TypeORM
-      // const [products, total] = await this.productRepository.findAndCount({
-      //   skip,
-      //   take: limit,
-      //   where,
-      //   relations: ['createdBy'],
-      //   order: { id: 'ASC' },
-      // });
-
       const [products, total] = await this.productRepository
         .createQueryBuilder('product')
-        .leftJoinAndSelect('product.createdBy', 'user') 
-        .leftJoinAndSelect('product.category', 'category') 
-        .leftJoinAndSelect('product.subcategory', 'subcategory') 
+        .leftJoinAndSelect('product.createdBy', 'user')
+        .leftJoinAndSelect('product.category', 'category')
+        .leftJoinAndSelect('product.subcategory', 'subcategory')
         .select([
           'product.id',
           'product.name',
+          'product.slug',
           'product.currentPrice',
           'product.originalPrice',
           'product.imageUrl',
@@ -76,15 +68,17 @@ export class ProductService {
           'product.description',
           'product.currentPrice',
           'product.originalPrice',
+          'product.createdAt',
           'user.id',
           'user.firstName',
           'user.lastName',
+          'user.role',
           'category.id',
           'category.name',
           'category.slug',
           'subcategory.id',
           'subcategory.name',
-          'subcategory.slug'
+          'subcategory.slug',
         ])
         .where(where)
         .orderBy('product.id', 'ASC')
@@ -114,6 +108,26 @@ export class ProductService {
     }
   }
 
+  async findById(id: string): Promise<ResponseType<Product>> {
+    try {
+      const product = await this.productRepository.findOne({ where: { id }, relations: ['category', 'subcategory', 'createdBy'] });
+
+      if (!product) {
+        throw new NotFoundException('Product not found.');
+      }
+
+      return {
+        success: true,
+        message: 'Product fetched successfully.',
+        data: product,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error.message || 'Failed to fetch product.',
+      );
+    }
+  }
+
   async createProduct(dto: CreateProductDto): Promise<ResponseType<Product>> {
     try {
       await this.checkForExistingProduct(dto.slug);
@@ -136,6 +150,55 @@ export class ProductService {
     }
   }
 
+  async editProduct(
+    id: string,
+    dto: Partial<CreateProductDto>
+  ): Promise<ResponseType<Product>> {
+    try {
+      // Find the existing product
+      const product = await this.productRepository.findOne({
+        where: { id },
+        relations: ['category', 'subcategory', 'createdBy', 'colors', 'sizes', 'stock'],
+      });
+  
+      if (!product) {
+        throw new NotFoundException(`Product with ID "${id}" not found.`);
+      }
+  
+      // If the slug is being updated, check for uniqueness
+      if (dto.slug && dto.slug !== product.slug) {
+        await this.checkForExistingProduct(dto.slug);
+      }
+  
+      // Fetch related entities if provided in DTO
+      const relatedEntities = await this.findReletedEntities(dto);
+  
+      // Apply updates only for fields provided in DTO
+      Object.assign(product, {
+        ...dto,
+        category: relatedEntities.category || product.category,
+        subcategory: relatedEntities.subcategory || product.subcategory,
+        createdBy: relatedEntities.createdBy || product.createdBy,
+        colors: relatedEntities.colors.length ? relatedEntities.colors : product.colors,
+        sizes: relatedEntities.sizes.length ? relatedEntities.sizes : product.sizes,
+        stock: relatedEntities.stock.length ? relatedEntities.stock : product.stock,
+      });
+  
+      // Save the updated product
+      await this.productRepository.save(product);
+  
+      return {
+        success: true,
+        message: 'Product updated successfully.',
+        data: product,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error.message || 'Failed to update product.',
+      );
+    }
+  }
+
   // Methods to improve code quality and maintainability
   private async validatePagination(page: number, limit: number) {
     if (page < 1) throw new BadRequestException('Page must be greater than 0.');
@@ -146,23 +209,26 @@ export class ProductService {
   private buildPriceFilder(minPrice?: number, maxPrice?: number) {
     const where: any = {};
 
-    if (minPrice !== undefined && maxPrice !== undefined) {
+    const isValidMinPrice = typeof minPrice === 'number' && !isNaN(minPrice);
+    const isValidMaxPrice = typeof maxPrice === 'number' && !isNaN(maxPrice);
+
+    if (isValidMinPrice && isValidMaxPrice) {
       if (minPrice > maxPrice) {
         throw new BadRequestException(
           'minPrice cannot be greater than maxPrice.',
         );
       }
       where.currentPrice = Between(minPrice, maxPrice);
-    } else if (minPrice !== undefined) {
+    } else if (isValidMinPrice) {
       where.currentPrice = Between(minPrice, Number.MAX_SAFE_INTEGER);
-    } else if (maxPrice !== undefined) {
+    } else if (isValidMaxPrice) {
       where.currentPrice = Between(0, maxPrice);
     }
 
-    return where;
+    return Object.keys(where).length ? where : {};
   }
 
-  private async findReletedEntities(dto: CreateProductDto) {
+  private async findReletedEntities(dto: Partial<CreateProductDto>) {
     const [category, subcategory, createdBy, colors, sizes, stock] =
       await Promise.all([
         this.categoryRepository.findOne({ where: { id: dto.category } }),
@@ -171,9 +237,9 @@ export class ProductService {
           where: { id: dto.createdBy },
           select: ['id', 'firstName', 'lastName'],
         }),
-        this.colorRepository.findBy({ id: In(dto.colors) }),
-        this.sizeRepository.findBy({ id: In(dto.sizes) }),
-        this.stockRepository.findBy({ id: In(dto.stock) }),
+        dto.colors?.length ? this.colorRepository.findBy({ id: In(dto.colors) }) : [],
+        dto.sizes?.length ? this.sizeRepository.findBy({ id: In(dto.sizes) }) : [],
+        dto.stock?.length ? this.stockRepository.findBy({ id: In(dto.stock) }) : [],
       ]);
 
     return { category, subcategory, createdBy, colors, sizes, stock };

@@ -29,7 +29,7 @@ export class User {
   @Column({ type: 'varchar', unique: true, nullable: true, length: 20 })
   phoneNumber?: string | null;
 
-  @Column({ type: 'varchar', select: false })
+  @Column({ type: 'varchar' })
   password: string;
 
   @Index()
@@ -48,13 +48,16 @@ export class User {
   @Column({ type: 'varchar', nullable: true, length: 200 })
   extraAddress?: string | null;
 
-  @Column({ type: 'varchar', nullable: true, select: false })
+  @Column({ type: 'varchar', nullable: true, length: 100 })
+  createdBy?: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
   refreshToken?: string | null;
 
-  @Column({ type: 'varchar', nullable: true, select: false })
+  @Column({ type: 'varchar', nullable: true })
   otpCode?: string | null;
 
-  @Column({ type: 'timestamp', nullable: true, select: false })
+  @Column({ type: 'timestamp', nullable: true })
   otpExpiresAt?: Date | null;
 
   @OneToMany(() => Product, (product) => product.createdBy)

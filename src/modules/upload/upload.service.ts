@@ -14,4 +14,14 @@ export class UploadService {
       },
     };
   }
+
+  async uploadMultipleImages(files: Express.Multer.File[]): Promise<ResponseType<{ image_urls: string[]}>> {
+    return {
+      success: true,
+      message: 'ok',
+      data: {
+        image_urls: files.map((file) => file.path)
+      }
+    }
+  }
 }
