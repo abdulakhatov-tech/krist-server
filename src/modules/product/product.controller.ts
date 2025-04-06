@@ -11,6 +11,7 @@ import {
 
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto';
+import { EditProductDto } from './dto/editProduct.dto';
 
 @Controller('products')
 export class ProductController {
@@ -51,7 +52,7 @@ export class ProductController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateProductDto: CreateProductDto,
+    @Body() updateProductDto: EditProductDto,
   ) {
     return this.productService.editProduct(id, updateProductDto);
   }

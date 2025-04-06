@@ -19,6 +19,7 @@ import {
 import { CreateProductDto } from './dto';
 import { FindAllPropsType } from './product.interface';
 import { ResponseType } from 'src/common/interfaces/general';
+import { EditProductDto } from './dto/editProduct.dto';
 
 @Injectable()
 export class ProductService {
@@ -193,7 +194,7 @@ export class ProductService {
 
   async editProduct(
     id: string,
-    dto: Partial<CreateProductDto>,
+    dto: Partial<EditProductDto>,
   ): Promise<ResponseType<Product>> {
     try {
       // Find the existing product
@@ -219,23 +220,13 @@ export class ProductService {
       }
 
       // Fetch related entities if provided in DTO
-      const relatedEntities = await this.findReletedEntities(dto);
+      const relatedEntities = await this.findReletedEntitiesEditMode(dto);
 
       // Apply updates only for fields provided in DTO
       Object.assign(product, {
         ...dto,
         category: relatedEntities.category || product.category,
         subcategory: relatedEntities.subcategory || product.subcategory,
-        createdBy: relatedEntities.createdBy || product.createdBy,
-        colors: relatedEntities.colors.length
-          ? relatedEntities.colors
-          : product.colors,
-        sizes: relatedEntities.sizes.length
-          ? relatedEntities.sizes
-          : product.sizes,
-        stock: relatedEntities.stock.length
-          ? relatedEntities.stock
-          : product.stock,
       });
 
       // Save the updated product
@@ -300,7 +291,7 @@ export class ProductService {
   }
 
   private async findReletedEntities(dto: Partial<CreateProductDto>) {
-    const [category, subcategory, createdBy, colors, sizes, stock] =
+    const [category, subcategory, createdBy] =
       await Promise.all([
         this.categoryRepository.findOne({ where: { id: dto.category } }),
         this.subcategoryRepository.findOne({ where: { id: dto.subcategory } }),
@@ -308,18 +299,19 @@ export class ProductService {
           where: { id: dto.createdBy },
           select: ['id', 'firstName', 'lastName'],
         }),
-        dto.colors?.length
-          ? this.colorRepository.findBy({ id: In(dto.colors) })
-          : [],
-        dto.sizes?.length
-          ? this.sizeRepository.findBy({ id: In(dto.sizes) })
-          : [],
-        dto.stock?.length
-          ? this.stockRepository.findBy({ id: In(dto.stock) })
-          : [],
       ]);
 
-    return { category, subcategory, createdBy, colors, sizes, stock };
+    return { category, subcategory, createdBy};
+  }
+
+  private async findReletedEntitiesEditMode(dto: Partial<EditProductDto>) {
+    const [category, subcategory] =
+      await Promise.all([
+        this.categoryRepository.findOne({ where: { id: dto.category } }),
+        this.subcategoryRepository.findOne({ where: { id: dto.subcategory } }),
+      ]);
+
+    return { category, subcategory};
   }
 
   private async checkForExistingProduct(slug: string) {

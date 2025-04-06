@@ -11,7 +11,7 @@ import {
   Min,
 } from 'class-validator';
 
-export class CreateProductDto {
+export class EditProductDto {
   @IsString()
   @IsNotEmpty()
   @Length(2, 50)
@@ -69,7 +69,4 @@ export class CreateProductDto {
   @IsBoolean()
   @IsOptional()
   isFeatured?: boolean;
-
-  @IsUUID()
-  createdBy: string;
 }

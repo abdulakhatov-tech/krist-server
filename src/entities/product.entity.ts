@@ -29,7 +29,7 @@ export class Product {
   @Column({ type: 'varchar', length: 200 })
   short_description: string;
 
-  @Column({ type: 'varchar', length: 10000, nullable: true })
+  @Column({ type: 'varchar', length: 1000, nullable: true })
   description?: string | null;
 
   @Column({ type: 'varchar', length: 60, unique: true })

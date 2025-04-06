@@ -27,9 +27,15 @@ export class CategoryController {
     return this.categoryService.findById(id);
   }
 
-  @Get(':slug/subcategories') 
+  @Get('/slug/:slug/subcategories') 
   async findSubCategoriesByCategorySlug(@Param('slug') slug: string ) {
     return this.categoryService.findSubCategoriesByCategorySlug(slug);
+  }
+
+  
+  @Get(':id/subcategories') 
+  async findSubCategoriesByCategoryId(@Param('id') id: string ) {
+    return this.categoryService.findSubCategoriesByCategoryId(id);
   }
 
   @Post()

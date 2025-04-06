@@ -60,6 +60,25 @@ export class CategoryService {
     };
   }
 
+  async findSubCategoriesByCategoryId(
+    id: string,
+  ): Promise<ResponseType<Subcategory[]>> {
+    const category = await this.categoryRepository.findOne({
+      where: { id },
+      relations: ['subcategories'],
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category not found.`);
+    }
+
+    return {
+      success: true,
+      message: 'Subcategories fetched successfully.',
+      data: category.subcategories,
+    };
+  }
+
   async createCategory(
     dto: CreateCategoryDto,
   ): Promise<ResponseType<Category>> {
