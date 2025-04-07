@@ -4,22 +4,19 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Between, In, Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import {
-  Size,
   Stock,
   User,
-  Color,
   Product,
   Category,
   Subcategory,
 } from 'src/entities';
-import { CreateProductDto } from './dto';
 import { FindAllPropsType } from './product.interface';
 import { ResponseType } from 'src/common/interfaces/general';
-import { EditProductDto } from './dto/editProduct.dto';
+import { CreateProductDto, EditProductDto, EditStockDto } from './dto';
 
 @Injectable()
 export class ProductService {
@@ -32,10 +29,6 @@ export class ProductService {
     private readonly subcategoryRepository: Repository<Subcategory>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Color)
-    private readonly colorRepository: Repository<Color>,
-    @InjectRepository(Size)
-    private readonly sizeRepository: Repository<Size>,
     @InjectRepository(Stock)
     private readonly stockRepository: Repository<Stock>,
   ) {}
@@ -67,6 +60,7 @@ export class ProductService {
         .leftJoinAndSelect('product.createdBy', 'user')
         .leftJoinAndSelect('product.category', 'category')
         .leftJoinAndSelect('product.subcategory', 'subcategory')
+        .leftJoinAndSelect('product.stock', 'stock')
         .select([
           'product.id',
           'product.name',
@@ -88,6 +82,10 @@ export class ProductService {
           'subcategory.id',
           'subcategory.name',
           'subcategory.slug',
+          'stock.id',               // ✅ Select stock fields too
+          'stock.color',
+          'stock.size',
+          'stock.quantity',
         ])
         .where(this.buildPriceFilter(minPrice, maxPrice));
 
@@ -98,10 +96,10 @@ export class ProductService {
         });
       }
 
-      if(subcategory) {
+      if (subcategory) {
         queryBuilder.andWhere('subcategory.slug = :subcategorySlug', {
-          subcategorySlug: subcategory
-        })
+          subcategorySlug: subcategory,
+        });
       }
 
       // Apply search filter
@@ -151,7 +149,7 @@ export class ProductService {
     try {
       const product = await this.productRepository.findOne({
         where: { id },
-        relations: ['category', 'subcategory', 'createdBy'],
+        relations: ['category', 'subcategory', 'createdBy', 'stock'],
       });
 
       if (!product) {
@@ -204,8 +202,6 @@ export class ProductService {
           'category',
           'subcategory',
           'createdBy',
-          'colors',
-          'sizes',
           'stock',
         ],
       });
@@ -245,9 +241,9 @@ export class ProductService {
   }
 
   async deleteProduct(id: string): Promise<ResponseType> {
-    const product = await this.productRepository.findOne({where: {id}});
+    const product = await this.productRepository.findOne({ where: { id } });
 
-    if(!product) {
+    if (!product) {
       throw new NotFoundException('Product not found!');
     }
 
@@ -256,9 +252,42 @@ export class ProductService {
     return {
       success: true,
       message: 'Product deleted successfully.',
-    }
+    };
+  }
 
-    
+  async editStock(id: string, dto: EditStockDto[]): Promise<ResponseType<Product>> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['stock'],
+    });
+  
+    if (!product) {
+      throw new NotFoundException('Product not found with this id');
+    }
+  
+    // Delete existing stock
+    await this.stockRepository.delete({ product: { id } });
+  
+    // Create new stock entries
+    const newStockEntities = dto.map((item) => {
+      return this.stockRepository.create({
+        ...item,
+        product, // associate with the existing product
+      });
+    });
+  
+    await this.stockRepository.save(newStockEntities);
+  
+    const updatedProduct = await this.productRepository.findOne({
+      where: { id },
+      relations: ['stock'],
+    });
+  
+    return {
+      success: true,
+      message: 'Product stock updated',
+      data: updatedProduct!,
+    };
   }
 
   // Methods to improve code quality and maintainability
@@ -291,27 +320,25 @@ export class ProductService {
   }
 
   private async findReletedEntities(dto: Partial<CreateProductDto>) {
-    const [category, subcategory, createdBy] =
-      await Promise.all([
-        this.categoryRepository.findOne({ where: { id: dto.category } }),
-        this.subcategoryRepository.findOne({ where: { id: dto.subcategory } }),
-        this.userRepository.findOne({
-          where: { id: dto.createdBy },
-          select: ['id', 'firstName', 'lastName'],
-        }),
-      ]);
+    const [category, subcategory, createdBy] = await Promise.all([
+      this.categoryRepository.findOne({ where: { id: dto.category } }),
+      this.subcategoryRepository.findOne({ where: { id: dto.subcategory } }),
+      this.userRepository.findOne({
+        where: { id: dto.createdBy },
+        select: ['id', 'firstName', 'lastName'],
+      }),
+    ]);
 
-    return { category, subcategory, createdBy};
+    return { category, subcategory, createdBy };
   }
 
   private async findReletedEntitiesEditMode(dto: Partial<EditProductDto>) {
-    const [category, subcategory] =
-      await Promise.all([
-        this.categoryRepository.findOne({ where: { id: dto.category } }),
-        this.subcategoryRepository.findOne({ where: { id: dto.subcategory } }),
-      ]);
+    const [category, subcategory] = await Promise.all([
+      this.categoryRepository.findOne({ where: { id: dto.category } }),
+      this.subcategoryRepository.findOne({ where: { id: dto.subcategory } }),
+    ]);
 
-    return { category, subcategory};
+    return { category, subcategory };
   }
 
   private async checkForExistingProduct(slug: string) {
@@ -326,7 +353,7 @@ export class ProductService {
   }
 
   private createProductEntity(dto: CreateProductDto, entities: any) {
-    const { category, subcategory, createdBy, colors, sizes, stock } = entities;
+    const { category, subcategory, createdBy, stock } = entities;
 
     if (!category || !subcategory || !createdBy) {
       throw new NotFoundException('Category, Subcategory, or User not found.');
@@ -346,8 +373,6 @@ export class ProductService {
     product.isBestSeller = dto.isBestSeller || false;
     product.isFeatured = dto.isFeatured || false;
     product.createdBy = createdBy;
-    product.colors = colors;
-    product.sizes = sizes;
     product.stock = stock;
 
     return product;

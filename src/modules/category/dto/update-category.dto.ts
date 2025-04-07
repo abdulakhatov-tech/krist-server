@@ -1,5 +1,4 @@
 import {
-  IsNotEmpty,
   IsOptional,
   IsString,
   Length,
@@ -24,5 +23,5 @@ export class UpdateCategoryDto {
   @IsString()
   @IsOptional()
   @Length(2, 255)
-  image_url?: string;
+  imageUrl?: string;
 }

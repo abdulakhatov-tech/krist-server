@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,6 +12,7 @@ import { Subcategory } from 'src/entities';
 import { Category } from 'src/entities/category.entity';
 import { ResponseType } from 'src/common/interfaces/general';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { FindAllPropsType } from './category.interface';
 
 @Injectable()
 export class CategoryService {
@@ -29,6 +31,58 @@ export class CategoryService {
       message: 'Categories fetched successfully.',
       data: categories,
     };
+  }
+
+  async findAllWithPagination({
+    page = 1,
+    limit = 24,
+    search,
+  }: FindAllPropsType): Promise<ResponseType<Category[]>> {
+    try {
+      await this.validatePagination(page, limit);
+
+      const skip = (page - 1) * limit;
+
+      const queryBuilder = this.categoryRepository
+        .createQueryBuilder('category')
+        .leftJoinAndSelect('category.subcategories', 'subcategory') 
+        .leftJoinAndSelect('category.products', 'product') 
+        .orderBy('category.id', 'ASC') // Ensure sorting is consistent
+        .skip(skip)
+        .take(limit);
+
+      // Apply search filter
+      if (search) {
+        queryBuilder.andWhere('category.name ILIKE :search', {
+          search: `%${search}%`,
+        });
+      }
+
+      // Pagination and sorting
+      queryBuilder.orderBy('category.id', 'ASC').skip(skip).take(limit);
+
+      const [categories, total] = await queryBuilder.getManyAndCount();
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        success: true,
+        message: 'Categories fetched successfully',
+        data: categories,
+        pagination: {
+          total,
+          totalPages,
+          currentPage: page,
+          perPage: limit,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error?.message || 'Error while fetching categories',
+      );
+    }
   }
 
   async findById(id: string): Promise<ResponseType<Category>> {
@@ -118,6 +172,13 @@ export class CategoryService {
       success: true,
       message: 'Category deleted successfully.',
     };
+  }
+
+  // Methods to improve code quality and maintainability
+  private async validatePagination(page: number, limit: number) {
+    if (page < 1) throw new BadRequestException('Page must be greater than 0.');
+    if (limit < 1)
+      throw new BadRequestException('Limit must be greater than 0.');
   }
 
   // Helper method to find a category by slug or throw NotFoundException

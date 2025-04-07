@@ -4,13 +4,13 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { Product } from './product.entity';
-import { Color } from './color.entity';
-import { Size } from './size.entity';
 
 @Entity('stocks')
+@Unique(['product', 'color', 'size'])
 export class Stock {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -18,11 +18,11 @@ export class Stock {
   @ManyToOne(() => Product, (product) => product.stock, { onDelete: 'CASCADE' })
   product: Product;
 
-  @ManyToOne(() => Color, { nullable: true, onDelete: 'CASCADE' })
-  color?: Color;
+  @Column({ type: 'varchar', length: 50 })
+  color: string;
 
-  @ManyToOne(() => Size, { nullable: true, onDelete: 'CASCADE' })
-  size?: Size;
+  @Column({ type: 'varchar', length: 20 })
+  size: string;
 
   @Column({ type: 'int', default: 0 })
   quantity: number;

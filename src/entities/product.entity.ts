@@ -14,8 +14,6 @@ import { Subcategory } from './subcategory.entity';
 import { FlashSaleItem } from './flash-sale-item.entity';
 import { Category } from './category.entity';
 import { BestSellingItem } from './best-selling-item.entity';
-import { Color } from './color.entity';
-import { Size } from './size.entity';
 import { Stock } from './stock.entity';
 
 @Entity('products')
@@ -92,12 +90,6 @@ export class Product {
   @JoinColumn({ name: 'created_by' })
   @Index()
   createdBy?: User;
-
-  @OneToMany(() => Color, (color) => color.product)
-  colors: Color[];
-
-  @OneToMany(() => Size, (size) => size.product)
-  sizes: Size[];
 
   @OneToMany(() => Stock, (stock) => stock.product)
   stock: Stock[];

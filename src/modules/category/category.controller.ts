@@ -8,6 +8,7 @@ import {
   HttpCode,
   Controller,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 
 import { CategoryService } from './category.service';
@@ -22,19 +23,33 @@ export class CategoryController {
     return this.categoryService.findAll();
   }
 
+  @Get('/all')
+  async findAllWithPagination(
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+    @Query('search') search: string,
+  ) {
+    const queries = {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      search,
+    };
+
+    return this.categoryService.findAllWithPagination(queries);
+  }
+
   @Get(':id')
   async findById(@Param('id') id: string) {
     return this.categoryService.findById(id);
   }
 
-  @Get('/slug/:slug/subcategories') 
-  async findSubCategoriesByCategorySlug(@Param('slug') slug: string ) {
+  @Get('/slug/:slug/subcategories')
+  async findSubCategoriesByCategorySlug(@Param('slug') slug: string) {
     return this.categoryService.findSubCategoriesByCategorySlug(slug);
   }
 
-  
-  @Get(':id/subcategories') 
-  async findSubCategoriesByCategoryId(@Param('id') id: string ) {
+  @Get(':id/subcategories')
+  async findSubCategoriesByCategoryId(@Param('id') id: string) {
     return this.categoryService.findSubCategoriesByCategoryId(id);
   }
 

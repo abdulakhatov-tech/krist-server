@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   Controller,
+  Query,
 } from '@nestjs/common';
 
 import { CreateSubCategoryDto, EditSubCategoryDto } from './dto';
@@ -21,6 +22,24 @@ export class SubcategoryController {
   async findAll() {
     return this.subcategoryService.findAll();
   }
+
+  @Get('/all')
+    async findAllWithPagination(
+      @Query('page') page: string,
+      @Query('limit') limit: string,
+      @Query('search') search: string,
+      @Query('category') category: string,
+    ) {
+      const queries = {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        search,
+        category
+      };
+  
+      return this.subcategoryService.findAllWithPagination(queries);
+    }
+  
 
   @Get(':id')
   async findById(@Param('id') id: string) {

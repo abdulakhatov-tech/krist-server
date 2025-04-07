@@ -11,7 +11,6 @@ import { CategoryModule } from './modules/category/category.module';
 import { SubcategoryModule } from './modules/subcategory/subcategory.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { ProductModule } from './modules/product/product.module';
-import { SizeModule } from './modules/size/size.module';
 
 @Module({
 	imports: [
@@ -23,7 +22,6 @@ import { SizeModule } from './modules/size/size.module';
 		SubcategoryModule,
 		UploadModule,
 		ProductModule,
-		SizeModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

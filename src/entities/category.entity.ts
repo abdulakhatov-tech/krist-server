@@ -21,7 +21,7 @@ export class Category {
   slug: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  image_url: string;
+  imageUrl: string;
 
   @OneToMany(() => Subcategory, (subcategory) => subcategory.category)
   subcategories: Subcategory[];

@@ -23,7 +23,7 @@ export class Subcategory {
   slug: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  image_url: string;
+  imageUrl: string;
 
   @ManyToOne(() => Category, (category) => category.subcategories, {
     onDelete: 'CASCADE',

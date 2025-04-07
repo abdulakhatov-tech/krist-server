@@ -24,5 +24,5 @@ export class CreateCategoryDto {
   @IsString()
   @IsOptional()
   @Length(2, 255)
-  image_url?: string;
+  imageUrl?: string;
 }

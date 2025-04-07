@@ -10,8 +10,7 @@ import {
 } from '@nestjs/common';
 
 import { ProductService } from './product.service';
-import { CreateProductDto } from './dto';
-import { EditProductDto } from './dto/editProduct.dto';
+import { CreateProductDto, EditProductDto, EditStockDto } from './dto';
 
 @Controller('products')
 export class ProductController {
@@ -60,6 +59,11 @@ export class ProductController {
   @Post()
   async create(@Body() createProductDto: CreateProductDto) {
     return this.productService.createProduct(createProductDto);
+  }
+
+  @Patch('/stock/:id')
+  async editStock(@Param("id") id: string, @Body() editStockDto: EditStockDto[]) {
+    return this.productService.editStock(id, editStockDto)
   }
 
   @Delete(':id')
