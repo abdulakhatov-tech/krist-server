@@ -15,6 +15,7 @@ import { FlashSaleItem } from './flash-sale-item.entity';
 import { Category } from './category.entity';
 import { BestSellingItem } from './best-selling-item.entity';
 import { Stock } from './stock.entity';
+import { Banner } from './banner.entity';
 
 @Entity('products')
 export class Product {
@@ -54,7 +55,7 @@ export class Product {
   imageUrl: string;
 
   @Column('text', { array: true, name: 'image_urls' })
-  imageUrls: string[]
+  imageUrls: string[];
 
   @ManyToOne(() => Category, (category) => category.products, {
     nullable: true,
@@ -73,6 +74,9 @@ export class Product {
 
   @Column({ type: 'boolean', default: false, name: 'is_featured' })
   isFeatured: boolean;
+
+  @Column({ type: 'float', default: 0 })
+  discount: number;
 
   @OneToMany(() => FlashSaleItem, (fleshSaleItem) => fleshSaleItem.product)
   flashSaleItems: FlashSaleItem[];
@@ -93,6 +97,9 @@ export class Product {
 
   @OneToMany(() => Stock, (stock) => stock.product)
   stock: Stock[];
+
+  @OneToMany(() => Banner, (banner) => banner.product)
+  banners: Banner[];
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;

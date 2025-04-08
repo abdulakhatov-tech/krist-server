@@ -72,6 +72,9 @@ export class ProductService {
           'product.short_description',
           'product.description',
           'product.createdAt',
+          'product.discount',
+          'product.isBestSeller',
+          'product.isFeatured',
           'user.id',
           'user.firstName',
           'user.lastName',
@@ -218,11 +221,16 @@ export class ProductService {
       // Fetch related entities if provided in DTO
       const relatedEntities = await this.findReletedEntitiesEditMode(dto);
 
+      const discount = Math.round(
+        (((dto?.originalPrice ?? 0) - (dto?.currentPrice ?? 0)) / (dto?.originalPrice ?? 1)) * 100
+      );
+
       // Apply updates only for fields provided in DTO
       Object.assign(product, {
         ...dto,
         category: relatedEntities.category || product.category,
         subcategory: relatedEntities.subcategory || product.subcategory,
+        discount: discount,
       });
 
       // Save the updated product
@@ -359,6 +367,11 @@ export class ProductService {
       throw new NotFoundException('Category, Subcategory, or User not found.');
     }
 
+    const discount = Math.round(
+      (((dto?.originalPrice ?? 0) - (dto?.currentPrice ?? 0)) / (dto?.originalPrice ?? 1)) * 100
+    );
+    
+
     const product = new Product();
     product.name = dto.name;
     product.slug = dto.slug;
@@ -374,6 +387,7 @@ export class ProductService {
     product.isFeatured = dto.isFeatured || false;
     product.createdBy = createdBy;
     product.stock = stock;
+    product.discount = discount;
 
     return product;
   }
