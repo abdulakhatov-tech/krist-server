@@ -5,10 +5,12 @@ import {
   Entity,
   Index,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Product } from './product.entity';
+import { Newsletter } from './newsletter.entity';
 
 @Entity('users')
 export class User {
@@ -62,6 +64,9 @@ export class User {
 
   @OneToMany(() => Product, (product) => product.createdBy)
   products: Product[];
+
+  @OneToOne(() => Newsletter, (newsletter) => newsletter.user)
+  newsletter: Newsletter;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
