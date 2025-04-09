@@ -148,6 +148,22 @@ export class ProductService {
     }
   }
 
+  async findAllProducts(): Promise<ResponseType<Product[]>> {
+    try {
+      const products = await this.productRepository.find();
+
+      return {
+        success: true,
+        message: 'Products fetched successfully.',
+        data: products,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error.message || 'Failed to fetch products.',
+      );
+    }
+  }
+
   async findById(id: string): Promise<ResponseType<Product>> {
     try {
       const product = await this.productRepository.findOne({

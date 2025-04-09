@@ -43,6 +43,11 @@ export class ProductController {
     return this.productService.findAll(queries);
   }
 
+  @Get('/all')
+  async findAllProducts() {
+    return this.productService.findAllProducts();
+  }
+
   @Get(':id')
   async findById(@Param('id') id: string) {
     return this.productService.findById(id);

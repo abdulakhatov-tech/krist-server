@@ -12,6 +12,7 @@ import { SubcategoryModule } from './modules/subcategory/subcategory.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { ProductModule } from './modules/product/product.module';
 import { SubscribeModule } from './modules/subscribe/subscribe.module';
+import { BannersModule } from './modules/banners/banners.module';
 
 @Module({
 	imports: [
@@ -24,6 +25,7 @@ import { SubscribeModule } from './modules/subscribe/subscribe.module';
 		UploadModule,
 		ProductModule,
 		SubscribeModule,
+		BannersModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

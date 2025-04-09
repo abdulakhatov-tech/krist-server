@@ -15,6 +15,12 @@ export class Banner {
 
   @Column({ type: 'varchar', length: 255 })
   name: string;
+  
+  @Column({ type: 'varchar', length: 255 })
+  slug: string;
+
+  @Column({ type: 'varchar', length: 255, name: 'description' })
+  description: string;
 
   @Column({ type: 'varchar', length: 255, name: 'image_url' })
   imageUrl: string;
@@ -22,12 +28,9 @@ export class Banner {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
-  @Column({ type: 'float', nullable: true })
-  overrideDiscount?: number;
-
   @ManyToOne(() => Product, (product) => product.banners, {
-    // eager: true,
-    // onDelete: 'CASCADE',
+    eager: true,
+    onDelete: 'CASCADE',
   })
   product: Product;
 
