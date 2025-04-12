@@ -13,6 +13,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { ProductModule } from './modules/product/product.module';
 import { SubscribeModule } from './modules/subscribe/subscribe.module';
 import { BannersModule } from './modules/banners/banners.module';
+import { WishlistModule } from './modules/wishlist/wishlist.module';
 
 @Module({
 	imports: [
@@ -26,6 +27,7 @@ import { BannersModule } from './modules/banners/banners.module';
 		ProductModule,
 		SubscribeModule,
 		BannersModule,
+		WishlistModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

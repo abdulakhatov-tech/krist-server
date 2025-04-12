@@ -53,6 +53,21 @@ export class ProductController {
     return this.productService.findById(id);
   }
 
+  @Get('/all/best-sellers')
+  async findBestSellers() {
+    return this.productService.findBestSellers();
+  }
+
+  @Get('/all/new-arrivals')
+  async findNewArrivals() {
+    return this.productService.findNewArrivals();
+  }
+
+  @Get('/all/featured')
+  async findFeatured() {
+    return this.productService.findFeatured();
+  }
+
   @Patch(':id')
   async update(
     @Param('id') id: string,

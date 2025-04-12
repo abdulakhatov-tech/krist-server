@@ -11,11 +11,10 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Subcategory } from './subcategory.entity';
-import { FlashSaleItem } from './flash-sale-item.entity';
 import { Category } from './category.entity';
-import { BestSellingItem } from './best-selling-item.entity';
 import { Stock } from './stock.entity';
 import { Banner } from './banner.entity';
+import { Wishlist } from './wishlist.entity';
 
 @Entity('products')
 export class Product {
@@ -78,15 +77,6 @@ export class Product {
   @Column({ type: 'float', default: 0 })
   discount: number;
 
-  @OneToMany(() => FlashSaleItem, (fleshSaleItem) => fleshSaleItem.product)
-  flashSaleItems: FlashSaleItem[];
-
-  @OneToMany(
-    () => BestSellingItem,
-    (bestSellingItem) => bestSellingItem.product,
-  )
-  bestSellingItems: BestSellingItem[];
-
   @ManyToOne(() => User, (user: User) => user.products, {
     nullable: true,
     onDelete: 'SET NULL',
@@ -100,6 +90,9 @@ export class Product {
 
   @OneToMany(() => Banner, (banner) => banner.product)
   banners: Banner[];
+  
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.product)
+  wishlistedBy: Wishlist[];
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;

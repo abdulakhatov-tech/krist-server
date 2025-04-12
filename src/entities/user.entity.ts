@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { Product } from './product.entity';
 import { Newsletter } from './newsletter.entity';
+import { Wishlist } from './wishlist.entity';
 
 @Entity('users')
 export class User {
@@ -67,6 +68,9 @@ export class User {
 
   @OneToOne(() => Newsletter, (newsletter) => newsletter.user)
   newsletter: Newsletter;
+
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
+  wishlist: Wishlist[]
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

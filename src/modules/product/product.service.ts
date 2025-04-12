@@ -7,13 +7,7 @@ import {
 import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import {
-  Stock,
-  User,
-  Product,
-  Category,
-  Subcategory,
-} from 'src/entities';
+import { Stock, User, Product, Category, Subcategory } from 'src/entities';
 import { FindAllPropsType } from './product.interface';
 import { ResponseType } from 'src/common/interfaces/general';
 import { CreateProductDto, EditProductDto, EditStockDto } from './dto';
@@ -85,7 +79,7 @@ export class ProductService {
           'subcategory.id',
           'subcategory.name',
           'subcategory.slug',
-          'stock.id',               // ✅ Select stock fields too
+          'stock.id', // ✅ Select stock fields too
           'stock.color',
           'stock.size',
           'stock.quantity',
@@ -187,6 +181,64 @@ export class ProductService {
     }
   }
 
+  async findBestSellers(): Promise<ResponseType<Product[]>> {
+    try {
+      const products = await this.productRepository.find({
+        where: { isBestSeller: true },
+        relations: ['category', 'subcategory', 'createdBy', 'stock'],
+      });
+
+      return {
+        success: true,
+        message: 'Best sellers fetched successfully.',
+        data: products,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error.message || 'Failed to fetch best sellers.',
+      );
+    }
+  }
+
+  async findNewArrivals(): Promise<ResponseType<Product[]>> {
+    try {
+      const products = await this.productRepository.find({
+        order: { createdAt: 'DESC' },
+        take: 10,
+        relations: ['category', 'subcategory', 'createdBy', 'stock'],
+      });
+
+      return {
+        success: true,
+        message: 'New arrivals fetched successfully.',
+        data: products,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error.message || 'Failed to fetch new arrivals.',
+      );
+    }
+  }
+
+  async findFeatured(): Promise<ResponseType<Product[]>> {
+    try {
+      const products = await this.productRepository.find({
+        where: { isFeatured: true },
+        relations: ['category', 'subcategory', 'createdBy', 'stock'],
+      });
+
+      return {
+        success: true,
+        message: 'Featured products fetched successfully.',
+        data: products,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error.message || 'Failed to fetch featured products.',
+      );
+    }
+  }
+
   async createProduct(dto: CreateProductDto): Promise<ResponseType<Product>> {
     try {
       await this.checkForExistingProduct(dto.slug);
@@ -217,12 +269,7 @@ export class ProductService {
       // Find the existing product
       const product = await this.productRepository.findOne({
         where: { id },
-        relations: [
-          'category',
-          'subcategory',
-          'createdBy',
-          'stock',
-        ],
+        relations: ['category', 'subcategory', 'createdBy', 'stock'],
       });
 
       if (!product) {
@@ -238,7 +285,9 @@ export class ProductService {
       const relatedEntities = await this.findReletedEntitiesEditMode(dto);
 
       const discount = Math.round(
-        (((dto?.originalPrice ?? 0) - (dto?.currentPrice ?? 0)) / (dto?.originalPrice ?? 1)) * 100
+        (((dto?.originalPrice ?? 0) - (dto?.currentPrice ?? 0)) /
+          (dto?.originalPrice ?? 1)) *
+          100,
       );
 
       // Apply updates only for fields provided in DTO
@@ -279,19 +328,22 @@ export class ProductService {
     };
   }
 
-  async editStock(id: string, dto: EditStockDto[]): Promise<ResponseType<Product>> {
+  async editStock(
+    id: string,
+    dto: EditStockDto[],
+  ): Promise<ResponseType<Product>> {
     const product = await this.productRepository.findOne({
       where: { id },
       relations: ['stock'],
     });
-  
+
     if (!product) {
       throw new NotFoundException('Product not found with this id');
     }
-  
+
     // Delete existing stock
     await this.stockRepository.delete({ product: { id } });
-  
+
     // Create new stock entries
     const newStockEntities = dto.map((item) => {
       return this.stockRepository.create({
@@ -299,14 +351,14 @@ export class ProductService {
         product, // associate with the existing product
       });
     });
-  
+
     await this.stockRepository.save(newStockEntities);
-  
+
     const updatedProduct = await this.productRepository.findOne({
       where: { id },
       relations: ['stock'],
     });
-  
+
     return {
       success: true,
       message: 'Product stock updated',
@@ -384,9 +436,10 @@ export class ProductService {
     }
 
     const discount = Math.round(
-      (((dto?.originalPrice ?? 0) - (dto?.currentPrice ?? 0)) / (dto?.originalPrice ?? 1)) * 100
+      (((dto?.originalPrice ?? 0) - (dto?.currentPrice ?? 0)) /
+        (dto?.originalPrice ?? 1)) *
+        100,
     );
-    
 
     const product = new Product();
     product.name = dto.name;
