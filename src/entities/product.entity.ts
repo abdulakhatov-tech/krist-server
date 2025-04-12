@@ -15,6 +15,7 @@ import { Category } from './category.entity';
 import { Stock } from './stock.entity';
 import { Banner } from './banner.entity';
 import { Wishlist } from './wishlist.entity';
+import { Cart } from './cart.entity';
 
 @Entity('products')
 export class Product {
@@ -93,6 +94,9 @@ export class Product {
   
   @OneToMany(() => Wishlist, (wishlist) => wishlist.product)
   wishlistedBy: Wishlist[];
+
+  @OneToMany(() => Cart, (cart) => cart.product)
+  cartedBy: Cart[];
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;

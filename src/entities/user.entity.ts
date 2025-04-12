@@ -12,6 +12,7 @@ import {
 import { Product } from './product.entity';
 import { Newsletter } from './newsletter.entity';
 import { Wishlist } from './wishlist.entity';
+import { Cart } from './cart.entity';
 
 @Entity('users')
 export class User {
@@ -70,7 +71,10 @@ export class User {
   newsletter: Newsletter;
 
   @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
-  wishlist: Wishlist[]
+  wishlist: Wishlist[];
+
+  @OneToMany(() => Cart, (cart) => cart.user)
+  cart: Cart[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
