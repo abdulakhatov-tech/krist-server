@@ -19,9 +19,14 @@ export class CartController {
     return this.cartService.addToCart(dto);
   }
 
-  @Patch()
-  updateQuantity(@Body() dto: AddToCartDto) {
-    return this.cartService.updateQuantity(dto);
+  @Patch('/increment-quantity')
+  incrementQuantity(@Body() dto: AddToCartDto) {
+    return this.cartService.incrementQuantity(dto);
+  }
+
+  @Patch('/decrement-quantity')
+  decrementQuantity(@Body() dto: AddToCartDto) {
+    return this.cartService.decrementQuantity(dto);
   }
 
   @Delete('/:userId/:productId')

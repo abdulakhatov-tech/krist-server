@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Unique } from 'typeorm';
+import {
+  Entity,
+  Column,
+  Unique,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 import { Product } from './product.entity';
 
@@ -14,6 +22,14 @@ export class Cart {
   @ManyToOne(() => User, (user) => user.cart, { onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => Product, (product) => product.cartedBy, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Product, (product) => product.cartedBy, {
+    onDelete: 'CASCADE',
+  })
   product: Product;
+
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
+  updatedAt: Date;
 }

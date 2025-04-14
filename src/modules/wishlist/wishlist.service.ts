@@ -55,7 +55,7 @@ export class WishlistService {
   
     const wishlist = await this.wishlistRepository.find({
       where: { user: { id: userId } },
-      relations: ['product'], // include product details
+      relations: ['product', 'product.category', 'product.subcategory'], // include product details
       order: { createdAt: 'DESC' }, // optional: latest first
     });
   
@@ -66,7 +66,7 @@ export class WishlistService {
     };
   }
 
-  async removeFromWishlist(userId: string, productId: string): Promise<ResponseType<null>> {
+  async removeFromWishlist(userId: string, productId: string): Promise<ResponseType<Wishlist>> {
     const wishlist = await this.wishlistRepository.findOne({
       where: { user: { id: userId }, product: { id: productId } },
     });
@@ -75,12 +75,12 @@ export class WishlistService {
       throw new NotFoundException('Wishlist item not found');
     }
   
-    await this.wishlistRepository.remove(wishlist);
+    const removedProduct = await this.wishlistRepository.remove(wishlist);
   
     return {
       success: true,
       message: 'Product removed from wishlist',
-      data: null,
+      data: removedProduct
     };
   }
   
