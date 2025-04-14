@@ -1,6 +1,7 @@
 import { Cart } from './cart.entity';
 import { User } from './user.entity';
 import { Stock } from './stock.entity';
+import { Coupon } from './coupon.entity'
 import { Banner } from './banner.entity';
 import { Product } from './product.entity';
 import { Wishlist } from './wishlist.entity';
@@ -13,6 +14,7 @@ export {
   User,
   Stock,
   Banner,
+  Coupon,
   Product,
   Wishlist,
   Category,

@@ -15,6 +15,7 @@ import { SubscribeModule } from './modules/subscribe/subscribe.module';
 import { BannersModule } from './modules/banners/banners.module';
 import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { CartModule } from './modules/cart/cart.module';
+import { CouponModule } from './modules/coupon/coupon.module';
 
 @Module({
 	imports: [
@@ -30,6 +31,7 @@ import { CartModule } from './modules/cart/cart.module';
 		BannersModule,
 		WishlistModule,
 		CartModule,
+		CouponModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

@@ -83,7 +83,6 @@ export class CartService {
   async decrementQuantity(dto: AddToCartDto): Promise<ResponseType<Cart>> {
     const { userId, productId } = dto;
 
-    console.log(userId, productId, 'minus')
 
     const item = await this.cartRepository.findOne({
       where: {
