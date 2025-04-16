@@ -5,8 +5,8 @@ export type DiscountType = 'percentage' | 'fixed';
 
 @Entity()
 export class Coupon {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   code: string;

@@ -13,6 +13,7 @@ import { Product } from './product.entity';
 import { Newsletter } from './newsletter.entity';
 import { Wishlist } from './wishlist.entity';
 import { Cart } from './cart.entity';
+import { Order } from './order.entity';
 
 @Entity('users')
 export class User {
@@ -72,6 +73,9 @@ export class User {
 
   @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
   wishlist: Wishlist[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 
   @OneToMany(() => Cart, (cart) => cart.user)
   cart: Cart[];

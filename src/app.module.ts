@@ -16,6 +16,7 @@ import { BannersModule } from './modules/banners/banners.module';
 import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { CartModule } from './modules/cart/cart.module';
 import { CouponModule } from './modules/coupon/coupon.module';
+import { OrderModule } from './modules/order/order.module';
 
 @Module({
 	imports: [
@@ -32,6 +33,7 @@ import { CouponModule } from './modules/coupon/coupon.module';
 		WishlistModule,
 		CartModule,
 		CouponModule,
+		OrderModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

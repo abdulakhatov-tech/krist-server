@@ -10,7 +10,7 @@ import { Brackets, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from 'src/entities';
-import { AddUserDto, EditUserDto, UserRoleDto } from './dto';
+import { AddUserDto, EditUserDto, EditUserOrderInfoDto, UserRoleDto } from './dto';
 import { SignUpUserDto } from '../auth/dto';
 import { ResponseType } from 'src/common/interfaces/general';
 import { UserRole } from 'src/common/enums/user-role.enum';
@@ -288,6 +288,45 @@ export class UserService {
     return {
       success: true,
       message: 'User updated successfully.',
+      data: updatedUser,
+    };
+  }
+
+  async editUserOrderInfo(userId: string, dto: EditUserOrderInfoDto): Promise<UserResponseType> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+  
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+  
+    // Check if the new email or phone number exists in another user (except the current user)
+    const existingUserWithEmail = await this.userRepository.findOne({
+      where: [
+        { email: dto.email, id: Not(userId) },
+      ],
+    });
+
+    if (existingUserWithEmail) {
+      throw new ConflictException('Email already exists for another user!');
+    }
+
+    const existingUserWithPhoneNumber = await this.userRepository.findOne({
+      where: [
+        { phoneNumber: dto.phoneNumber, id: Not(userId) },
+      ],
+    });
+
+     // If email or phone number is not updated, we can keep the original values.
+     const updatedUser = await this.userRepository.save({
+      ...user,
+      ...dto,
+      email: dto.email || user.email, 
+      phoneNumber: dto.phoneNumber || user.phoneNumber, 
+    });
+  
+    return {
+      success: true,
+      message: 'User Order Info updated successfully.',
       data: updatedUser,
     };
   }
