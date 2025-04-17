@@ -154,4 +154,15 @@ export class CartService {
       data: cart,
     };
   }
+
+  async clearCart(userId: string): Promise<ResponseType<[]>> {
+    // Delete all items in the cart for the user
+    await this.cartRepository.delete({ user: { id: userId } });
+
+    return {
+      success: true,
+      message: 'Cart has been cleared!',
+      data: [],  // No data needs to be returned, just a success message
+    };
+  }
 }

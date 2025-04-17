@@ -17,6 +17,7 @@ import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { CartModule } from './modules/cart/cart.module';
 import { CouponModule } from './modules/coupon/coupon.module';
 import { OrderModule } from './modules/order/order.module';
+import { StripeModule } from './modules/stripe/stripe.module';
 
 @Module({
 	imports: [
@@ -34,6 +35,7 @@ import { OrderModule } from './modules/order/order.module';
 		CartModule,
 		CouponModule,
 		OrderModule,
+		StripeModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

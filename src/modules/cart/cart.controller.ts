@@ -41,4 +41,9 @@ export class CartController {
   getCart(@Param('userId') userId: string) {
     return this.cartService.getCart(userId);
   }
+
+  @Delete('/:userId')
+  clearCart(@Param('userId') userId: string) {
+    return this.cartService.clearCart(userId);
+  }
 }
