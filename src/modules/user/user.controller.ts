@@ -13,6 +13,7 @@ import {
 import { UserService } from './user.service';
 import { UserRole } from 'src/common/enums/user-role.enum';
 import { AddUserDto, EditUserDto, EditUserOrderInfoDto, UserRoleDto } from './dto';
+import { EditUserProfileInfoDto } from './dto/edit-user-profile.info.dto';
 
 @Controller('users')
 export class UserController {
@@ -63,6 +64,11 @@ export class UserController {
   @Patch(':id/order-info')
   async updateUserOrderInfo(@Param('id') id: string, @Body() dto: EditUserOrderInfoDto) {
     return this.userService.editUserOrderInfo(id, dto);
+  }
+
+  @Patch(':id/profile-info')
+  async updateUserProfileInfo(@Param('id') id: string, @Body() dto: EditUserProfileInfoDto) {
+    return this.userService.editUserProfileInfo(id, dto)
   }
 
   @Delete(':id')

@@ -1,21 +1,11 @@
 import {
   IsNotEmpty,
+  IsOptional,
   IsString,
 } from 'class-validator';
 
-export enum DeliverMethod {
-  COURIER = 'courier',
-  PICKUP = 'pickup',
-  POSTAL = 'postal',
-}
 
-export enum PaymentMethod {
-  CASH = 'cash',
-  PAYME = 'payme',
-  CLICK = 'click',
-}
-
-export class EditUserOrderInfoDto {
+export class EditUserProfileInfoDto {
   @IsString()
   @IsNotEmpty()
   firstName: string;
@@ -43,4 +33,16 @@ export class EditUserOrderInfoDto {
   @IsString()
   @IsNotEmpty()
   extraAddress: string;
+
+  @IsString()
+  @IsNotEmpty()
+  profilePhoto: string;
+
+  @IsString()
+  @IsOptional()
+  password: string;
+ 
+  @IsString()
+  @IsOptional()
+  newPassword: string;
 }

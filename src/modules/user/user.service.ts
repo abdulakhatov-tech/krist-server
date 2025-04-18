@@ -10,12 +10,18 @@ import { Brackets, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from 'src/entities';
-import { AddUserDto, EditUserDto, EditUserOrderInfoDto, UserRoleDto } from './dto';
+import {
+  AddUserDto,
+  EditUserDto,
+  EditUserOrderInfoDto,
+  UserRoleDto,
+} from './dto';
 import { SignUpUserDto } from '../auth/dto';
 import { ResponseType } from 'src/common/interfaces/general';
 import { UserRole } from 'src/common/enums/user-role.enum';
 import { AuthResponseType } from '../auth/auth.interface';
 import { UserResponseType } from './user.interface';
+import { EditUserProfileInfoDto } from './dto/edit-user-profile.info.dto';
 
 @Injectable()
 export class UserService {
@@ -51,60 +57,62 @@ export class UserService {
     }
 
     // Create query builder for more complex queries
-  const queryBuilder = this.userRepository.createQueryBuilder('user');
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
 
-  // Role condition
-  if (role) {
-    queryBuilder.andWhere('user.role = :role', { role });
-  }
-
-  // Search condition - handles "john+doe" or "john doe" format
-  if (search) {
-    // Replace '+' with space and trim
-    const searchTerm = search.replace(/\+/g, ' ').trim();
-    
-    // Split into parts for first/last name search
-    const searchParts = searchTerm.split(/\s+/);
-    
-    queryBuilder.andWhere(
-      new Brackets(qb => {
-        // Search for exact full name match
-        qb.where(
-          "CONCAT(LOWER(user.firstName), ' ', LOWER(user.lastName)) LIKE LOWER(:fullName)",
-          { fullName: `%${searchTerm}%` }
-        );
-        
-        // Also search each part individually in both fields
-        searchParts.forEach(part => {
-          qb.orWhere('LOWER(user.firstName) LIKE LOWER(:part)', { part: `%${part}%` })
-            .orWhere('LOWER(user.lastName) LIKE LOWER(:part)', { part: `%${part}%` });
-        });
-      })
-    );
-  }
-
-  // Date range condition
-  if (startDate || endDate) {
-    if (startDate) {
-      queryBuilder.andWhere('user.createdAt >= :startDate', { startDate });
+    // Role condition
+    if (role) {
+      queryBuilder.andWhere('user.role = :role', { role });
     }
-    if (endDate) {
-      queryBuilder.andWhere('user.createdAt <= :endDate', { endDate });
+
+    // Search condition - handles "john+doe" or "john doe" format
+    if (search) {
+      // Replace '+' with space and trim
+      const searchTerm = search.replace(/\+/g, ' ').trim();
+
+      // Split into parts for first/last name search
+      const searchParts = searchTerm.split(/\s+/);
+
+      queryBuilder.andWhere(
+        new Brackets((qb) => {
+          // Search for exact full name match
+          qb.where(
+            "CONCAT(LOWER(user.firstName), ' ', LOWER(user.lastName)) LIKE LOWER(:fullName)",
+            { fullName: `%${searchTerm}%` },
+          );
+
+          // Also search each part individually in both fields
+          searchParts.forEach((part) => {
+            qb.orWhere('LOWER(user.firstName) LIKE LOWER(:part)', {
+              part: `%${part}%`,
+            }).orWhere('LOWER(user.lastName) LIKE LOWER(:part)', {
+              part: `%${part}%`,
+            });
+          });
+        }),
+      );
     }
-  }
 
-  // Get total count
-  const total = await queryBuilder.getCount();
+    // Date range condition
+    if (startDate || endDate) {
+      if (startDate) {
+        queryBuilder.andWhere('user.createdAt >= :startDate', { startDate });
+      }
+      if (endDate) {
+        queryBuilder.andWhere('user.createdAt <= :endDate', { endDate });
+      }
+    }
 
-  // Get paginated results
-  const users = await queryBuilder
-    .orderBy('user.createdAt', 'DESC')
-    .skip((page - 1) * limit)
-    .take(limit)
-    .getMany();
+    // Get total count
+    const total = await queryBuilder.getCount();
 
-  const totalPages = Math.ceil(total / limit);
+    // Get paginated results
+    const users = await queryBuilder
+      .orderBy('user.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
 
+    const totalPages = Math.ceil(total / limit);
 
     return {
       success: true,
@@ -208,25 +216,23 @@ export class UserService {
   async addUser(dto: AddUserDto): Promise<UserResponseType> {
     const { email, phoneNumber } = dto;
 
-     // Check if the new email or phone number exists in another user (except the current user)
-     const existingUserWithEmail = await this.userRepository.findOne({
-      where: [
-        { email: dto.email, },
-      ],
+    // Check if the new email or phone number exists in another user (except the current user)
+    const existingUserWithEmail = await this.userRepository.findOne({
+      where: [{ email: dto.email }],
     });
-  
+
     if (existingUserWithEmail) {
       throw new ConflictException('Email already exists for another user!');
     }
 
     const existingUserWithPhoneNumber = await this.userRepository.findOne({
-      where: [
-        { phoneNumber: dto.phoneNumber, },
-      ],
+      where: [{ phoneNumber: dto.phoneNumber }],
     });
-  
+
     if (existingUserWithPhoneNumber) {
-      throw new ConflictException('Phone Number already exists for another user!');
+      throw new ConflictException(
+        'Phone Number already exists for another user!',
+      );
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -251,40 +257,38 @@ export class UserService {
 
   async editUser(userId: string, dto: EditUserDto): Promise<UserResponseType> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-  
+
     if (!user) {
       throw new NotFoundException('User not found!');
     }
-  
+
     // Check if the new email or phone number exists in another user (except the current user)
     const existingUserWithEmail = await this.userRepository.findOne({
-      where: [
-        { email: dto.email, id: Not(userId) },
-      ],
+      where: [{ email: dto.email, id: Not(userId) }],
     });
-  
+
     if (existingUserWithEmail) {
       throw new ConflictException('Email already exists for another user!');
     }
 
     const existingUserWithPhoneNumber = await this.userRepository.findOne({
-      where: [
-        { phoneNumber: dto.phoneNumber, id: Not(userId) },
-      ],
+      where: [{ phoneNumber: dto.phoneNumber, id: Not(userId) }],
     });
-  
+
     if (existingUserWithPhoneNumber) {
-      throw new ConflictException('Phone Number already exists for another user!');
+      throw new ConflictException(
+        'Phone Number already exists for another user!',
+      );
     }
-  
+
     // If email or phone number is not updated, we can keep the original values.
     const updatedUser = await this.userRepository.save({
       ...user,
       ...dto,
-      email: dto.email || user.email,  // Keep original email if not updated
-      phoneNumber: dto.phoneNumber || user.phoneNumber,  // Keep original phone number if not updated
+      email: dto.email || user.email, // Keep original email if not updated
+      phoneNumber: dto.phoneNumber || user.phoneNumber, // Keep original phone number if not updated
     });
-  
+
     return {
       success: true,
       message: 'User updated successfully.',
@@ -292,18 +296,19 @@ export class UserService {
     };
   }
 
-  async editUserOrderInfo(userId: string, dto: EditUserOrderInfoDto): Promise<UserResponseType> {
+  async editUserOrderInfo(
+    userId: string,
+    dto: EditUserOrderInfoDto,
+  ): Promise<UserResponseType> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-  
+
     if (!user) {
       throw new NotFoundException('User not found!');
     }
-  
+
     // Check if the new email or phone number exists in another user (except the current user)
     const existingUserWithEmail = await this.userRepository.findOne({
-      where: [
-        { email: dto.email, id: Not(userId) },
-      ],
+      where: [{ email: dto.email, id: Not(userId) }],
     });
 
     if (existingUserWithEmail) {
@@ -311,23 +316,61 @@ export class UserService {
     }
 
     const existingUserWithPhoneNumber = await this.userRepository.findOne({
-      where: [
-        { phoneNumber: dto.phoneNumber, id: Not(userId) },
-      ],
+      where: [{ phoneNumber: dto.phoneNumber, id: Not(userId) }],
     });
 
-     // If email or phone number is not updated, we can keep the original values.
-     const updatedUser = await this.userRepository.save({
+    // If email or phone number is not updated, we can keep the original values.
+    const updatedUser = await this.userRepository.save({
       ...user,
       ...dto,
-      email: dto.email || user.email, 
-      phoneNumber: dto.phoneNumber || user.phoneNumber, 
+      email: dto.email || user.email,
+      phoneNumber: dto.phoneNumber || user.phoneNumber,
     });
-  
+
     return {
       success: true,
       message: 'User Order Info updated successfully.',
       data: updatedUser,
+    };
+  }
+
+  async editUserProfileInfo(
+    userId: string,
+    dto: EditUserProfileInfoDto,
+  ): Promise<UserResponseType> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+
+    // Update general profile info
+    user.firstName = dto.firstName;
+    user.lastName = dto.lastName;
+    user.email = dto.email;
+    user.phoneNumber = dto.phoneNumber;
+    user.region = dto.region;
+    user.district = dto.district;
+    user.extraAddress = dto.extraAddress;
+    user.profilePhoto = dto.profilePhoto;
+
+    // Optional: update password
+    if (dto.password && dto.newPassword) {
+      const isMatch = await bcrypt.compare(dto.password, user.password);
+      if (!isMatch) {
+        throw new BadRequestException('Old password is incorrect');
+      }
+
+      const hashedNewPassword = await bcrypt.hash(dto.newPassword, 10);
+      user.password = hashedNewPassword;
+    }
+
+    const savedUser = await this.userRepository.save(user);
+
+    return {
+      success: true,
+      message: 'User Profile Info updated',
+      data: savedUser,
     };
   }
 

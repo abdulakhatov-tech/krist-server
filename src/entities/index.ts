@@ -4,6 +4,7 @@ import { Stock } from './stock.entity';
 import { Order } from './order.entity'
 import { Coupon } from './coupon.entity'
 import { Banner } from './banner.entity';
+import { Contact } from './contact.entity'
 import { Product } from './product.entity';
 import { Wishlist } from './wishlist.entity';
 import { Category } from './category.entity';
@@ -18,6 +19,7 @@ export {
   Stock,
   Banner,
   Coupon,
+  Contact,
   Product,
   Wishlist,
   Category,
